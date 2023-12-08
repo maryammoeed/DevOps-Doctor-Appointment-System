@@ -75,6 +75,10 @@ jobs:
         sed -i "s/image: maryammoeed1\/appointments:.*/image: maryammoeed1\/appointments:$DOCKER_VERSION/" docker-compose.yml
         sed -i "s/image: maryammoeed1\/frontend:.*/image: maryammoeed1\/frontend:$DOCKER_VERSION/" docker-compose.yml
 
+    - name: Check if changes exist
+      run: |
+        git diff --exit-code || echo "Changes detected"
+
     - name: Commit and push changes
       run: |
         git config --global user.email "maryammoeed68@gmail.com"
