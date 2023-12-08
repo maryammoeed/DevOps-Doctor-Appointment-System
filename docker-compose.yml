@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  doctor-service:
+    build:
+      context: ./doctors
+    ports:
+      - "9090:9090"
+    depends_on:
+      - mongodb
+
+  appointment-service:
+    build:
+      context: ./appointments
+    ports:
+      - "7070:7070"
+    depends_on:
+      - mongodb
+
+  frontend-service:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - doctor-service
+      - appointment-service
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"

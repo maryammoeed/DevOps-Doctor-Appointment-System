@@ -1,0 +1,4 @@
+Flask
+Flask-Admin
+pymongo==3.12.0
+

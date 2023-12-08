@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchDoctorsData() {
       try {
-        const response = await fetch('/api/doctors'); // Adjust the API endpoint as needed
+        const response = await fetch('http://localhost:9090/doctors'); // Adjust the API endpoint as needed
         const doctorsData = await response.json();
   
         // Clear the table body
@@ -47,32 +47,32 @@ document.addEventListener('DOMContentLoaded', () => {
   
     async function fetchAppointmentsData() {
       try {
-        const response = await fetch('/api/appointments');
+        const response = await fetch('http://localhost:7070/appointments');
         const appointmentsData = await response.json();
-  
+    
         appointmentsTable.innerHTML = '';
-  
-        appointmentsData.forEach(appointments => {
+    
+        appointmentsData.forEach(appointment => {
           const row = document.createElement('tr');
-          
+    
           const idCell = document.createElement('td');
-          idCell.textContent = appointments.id;
-          
-          const firstNameCell = document.createElement('td');
-          firstNameCell.textContent = appointments.doctor;
-          
-          const lastNameCell = document.createElement('td');
-          lastNameCell.textContent = appointments.date;
-
-          const specialityCell = document.createElement('td');
-          specialityCell.textContent = appointments.rating;
-  
+          idCell.textContent = appointment.id;
+    
+          const doctorCell = document.createElement('td');
+          doctorCell.textContent = appointment.doctor;
+    
+          const dateCell = document.createElement('td');
+          dateCell.textContent = appointment.date;
+    
+          const ratingCell = document.createElement('td');
+          ratingCell.textContent = appointment.rating;
+    
           // Append cells to the row
           row.appendChild(idCell);
-          row.appendChild(firstNameCell);
-          row.appendChild(lastNameCell);
-          row.appendChild(specialityCell);
-  
+          row.appendChild(doctorCell);
+          row.appendChild(dateCell);
+          row.appendChild(ratingCell);
+    
           // Append the row to the table body
           appointmentsTable.appendChild(row);
         });
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Error fetching appointments:', error);
       }
     }
-  
+    
     function showDoctors() {
       doctorsTab.classList.add('active');
       appointmentsTab.classList.remove('active');
@@ -100,6 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Fetch appointments data when switching to the Appointments tab
       fetchAppointmentsData();
     }
+    
   
     // Initial setup: Show the "Doctors" content and fetch doctors data
     showDoctors();

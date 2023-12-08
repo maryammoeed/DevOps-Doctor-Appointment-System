@@ -1,0 +1,4 @@
+Flask
+Flask-Admin
+pymongo==3.12.0
+Flask-CORS==3.0.10
