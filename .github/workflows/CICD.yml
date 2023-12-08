@@ -1,0 +1,84 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-push-doctor:
+    runs-on: ubuntu-latest
+    if: contains(github.event_path, 'doctors/') || github.event_name == 'pull_request'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Build and push Doctor Docker image
+      run: |
+        DOCKER_VERSION=$(echo "${{ github.sha }}" | cut -c1-7)
+        docker build -t maryammoeed1/doctors:$DOCKER_VERSION ./doctors
+        docker push maryammoeed1/doctors:$DOCKER_VERSION
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  build-and-push-appointment:
+    runs-on: ubuntu-latest
+    if: contains(github.event_path, 'appointments/') || github.event_name == 'pull_request'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Build and push Appointment Docker image
+      run: |
+        DOCKER_VERSION=$(echo "${{ github.sha }}" | cut -c1-7)
+        docker build -t maryammoeed1/appointments:$DOCKER_VERSION ./appointments
+        docker push maryammoeed1/appointments:$DOCKER_VERSION
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  build-and-push-frontend:
+    runs-on: ubuntu-latest
+    if: contains(github.event_path, 'frontend/') || github.event_name == 'pull_request'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Build and push Frontend Docker image
+      run: |
+        DOCKER_VERSION=$(echo "${{ github.sha }}" | cut -c1-7)
+        docker build -t maryammoeed1/frontend:$DOCKER_VERSION ./frontend
+        docker push maryammoeed1/frontend:$DOCKER_VERSION
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  update-docker-compose:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Update Docker Compose file
+      run: |
+        DOCKER_VERSION=$(echo "${{ github.sha }}" | cut -c1-7)
+        sed -i "s/image: maryammoeed1\/doctors:.*/image: maryammoeed1\/doctors:$DOCKER_VERSION/" docker-compose.yml
+        sed -i "s/image: maryammoeed1\/appointments:.*/image: maryammoeed1\/appointments:$DOCKER_VERSION/" docker-compose.yml
+        sed -i "s/image: maryammoeed1\/frontend:.*/image: maryammoeed1\/frontend:$DOCKER_VERSION/" docker-compose.yml
+
+    - name: Commit and push changes
+      run: |
+        git config --global user.email "maryammoeed68@gmail.com"
+        git config --global user.name "maryammoeed"
+        git add docker-compose.yml
+        git commit -m "Update Docker images in docker-compose.yml"
+        git push
