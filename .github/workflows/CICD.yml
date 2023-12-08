@@ -74,10 +74,12 @@ jobs:
         sed -i "s/image: maryammoeed1\/doctors:.*/image: maryammoeed1\/doctors:$DOCKER_VERSION/" docker-compose.yml
         sed -i "s/image: maryammoeed1\/appointments:.*/image: maryammoeed1\/appointments:$DOCKER_VERSION/" docker-compose.yml
         sed -i "s/image: maryammoeed1\/frontend:.*/image: maryammoeed1\/frontend:$DOCKER_VERSION/" docker-compose.yml
+        cat docker-compose.yml  # Debug: Print the content of docker-compose.yml after sed commands
 
     - name: Check if changes exist
       run: |
         git diff --exit-code || echo "Changes detected"
+        cat docker-compose.yml  # Debug: Print the content of docker-compose.yml before attempting to commit
 
     - name: Commit and push changes
       run: |
