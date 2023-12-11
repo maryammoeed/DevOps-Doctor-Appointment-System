@@ -1,4 +1,4 @@
-name: CI/CD
+name: CICD
 
 on:
   push:
@@ -6,85 +6,80 @@ on:
       - main
   pull_request:
     branches:
-      - main
+      - '*'
 
 jobs:
-  build-and-push-doctor:
+  build-and-push-doctors:
     runs-on: ubuntu-latest
-    if: contains(github.event_path, 'doctors/') || github.event_name == 'pull_request'
-
+    if: "contains(github.event_path, 'doctors/')"
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Build and push Doctor Docker image
-      run: |
-        DOCKER_VERSION=$(echo "${{ github.sha }}" | cut -c1-7)
-        docker build -t maryammoeed1/doctors:$DOCKER_VERSION ./doctors
-        docker push maryammoeed1/doctors:$DOCKER_VERSION
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Build and push Docker image for Doctors
       env:
+        VERSION: ${{ github.sha }}
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: |
+        docker buildx create --use
+        docker buildx inspect --bootstrap
+        docker buildx build --platform linux/amd64,linux/arm64 -t maryammoeed1/doctors-service:${VERSION} ./doctors --push
 
-  build-and-push-appointment:
+  build-and-push-appointments:
     runs-on: ubuntu-latest
-    if: contains(github.event_path, 'appointments/') || github.event_name == 'pull_request'
-
+    if: "contains(github.event_path, 'appointments/')"
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Build and push Appointment Docker image
-      run: |
-        DOCKER_VERSION=$(echo "${{ github.sha }}" | cut -c1-7)
-        docker build -t maryammoeed1/appointments:$DOCKER_VERSION ./appointments
-        docker push maryammoeed1/appointments:$DOCKER_VERSION
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Build and push Docker image for Appointments
       env:
+        VERSION: ${{ github.sha }}
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: |
+        docker buildx create --use
+        docker buildx inspect --bootstrap
+        docker buildx build --platform linux/amd64,linux/arm64 -t maryammoeed1/appointments-service:${VERSION} ./appointments --push
 
   build-and-push-frontend:
     runs-on: ubuntu-latest
-    if: contains(github.event_path, 'frontend/') || github.event_name == 'pull_request'
-
+    if: "contains(github.event_path, 'frontend/')"
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Build and push Frontend Docker image
-      run: |
-        DOCKER_VERSION=$(echo "${{ github.sha }}" | cut -c1-7)
-        docker build -t maryammoeed1/frontend:$DOCKER_VERSION ./frontend
-        docker push maryammoeed1/frontend:$DOCKER_VERSION
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+
+    - name: Build and push Docker image for Frontend
       env:
+        VERSION: ${{ github.sha }}
         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: |
+        docker buildx create --use
+        docker buildx inspect --bootstrap
+        docker buildx build --platform linux/amd64,linux/arm64 -t maryammoeed1/frontends-service:${VERSION} ./frontend --push
 
-  update-docker-compose:
+  update-compose:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-
+    needs: [build-and-push-doctors, build-and-push-appointments, build-and-push-frontend]
     steps:
-    - name: Checkout repository
+    - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Update Docker Compose file
+    - name: Update Docker Compose
       run: |
-        DOCKER_VERSION=$(echo "${{ github.sha }}" | cut -c1-7)
-        sed -i "s/image: maryammoeed1\/doctors:.*/image: maryammoeed1\/doctors:$DOCKER_VERSION/" docker-compose.yml
-        sed -i "s/image: maryammoeed1\/appointments:.*/image: maryammoeed1\/appointments:$DOCKER_VERSION/" docker-compose.yml
-        sed -i "s/image: maryammoeed1\/frontend:.*/image: maryammoeed1\/frontend:$DOCKER_VERSION/" docker-compose.yml
-        cat docker-compose.yml  # Debug: Print the content of docker-compose.yml after sed commands
-
-    - name: Check if changes exist
-      run: |
-        git diff --exit-code || echo "Changes detected"
-        cat docker-compose.yml  # Debug: Print the content of docker-compose.yml before attempting to commit
-
-    - name: Commit and push changes
-      run: |
-        git config --global user.email "maryammoeed68@gmail.com"
-        git config --global user.name "maryammoeed"
-        git add docker-compose.yml
-        git commit -m "Update Docker images in docker-compose.yml"
-        git push
+        sed -i 's#maryammoeed1/doctors-service:.*#maryammoeed1/doctors-service:${{ github.event.workflow_run.build-and-push-doctors.conclusion == 'success' }}#' docker-compose.yaml
+        sed -i 's#maryammoeed1/appointments-service:.*#maryammoeed1/appointments-service:${{ github.event.workflow_run.build-and-push-appointments.conclusion == 'success' }}#' docker-compose.yaml
+        sed -i 's#maryammoeed1/frontends-service:.*#maryammoeed1/frontends-service:${{ github.event.workflow_run.build-and-push-frontend.conclusion == 'success' }}#' docker-compose.yaml
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
