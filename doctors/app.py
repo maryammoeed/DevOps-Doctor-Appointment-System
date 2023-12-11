@@ -4,7 +4,7 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
-client = MongoClient('mongodb://mongodb:27017/')  # Replace with your MongoDB connection string
+client = MongoClient('mongodb://mongodb-service:27017/')
 db = client['doctors_db']
 doctors_collection = db['doctors']
 

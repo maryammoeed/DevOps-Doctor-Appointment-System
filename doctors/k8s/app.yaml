@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: doctors-service
+spec:
+  selector:
+    app: doctors
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 9090
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: doctors-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: doctors
+  template:
+    metadata:
+      labels:
+        app: doctors
+    spec:
+      containers:
+        - name: doctors
+          image: maryammoeed1/doctor-service:latest
+          ports:
+            - containerPort: 9090
+          env:
+            - name: MONGO_DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: mongodb-secret
+                  key: mongo-url
+      imagePullSecrets:
+        - name: dockerhub-secret
