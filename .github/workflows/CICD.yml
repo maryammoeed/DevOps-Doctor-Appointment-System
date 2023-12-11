@@ -1,4 +1,4 @@
-name: CI/CD
+name: CICD
 
 on:
   push:
@@ -11,7 +11,7 @@ on:
 jobs:
   build-and-push-doctor:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    # Run this job for all pushes and pull requests.
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -26,7 +26,7 @@ jobs:
 
   build-and-push-appointment:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    # Run this job for all pushes and pull requests.
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -41,7 +41,7 @@ jobs:
 
   build-and-push-frontend:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    # Run this job for all pushes and pull requests.
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -56,7 +56,8 @@ jobs:
 
   update-docker-compose:
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    # Run this job only on pushes to the main branch.
+    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -66,7 +67,6 @@ jobs:
           sed -i "s/image: maryammoeed1\/doctors:.*/image: maryammoeed1\/doctors:$DOCKER_VERSION/" docker-compose.yml
           sed -i "s/image: maryammoeed1\/appointments:.*/image: maryammoeed1\/appointments:$DOCKER_VERSION/" docker-compose.yml
           sed -i "s/image: maryammoeed1\/frontend:.*/image: maryammoeed1\/frontend:$DOCKER_VERSION/" docker-compose.yml
-          cat docker-compose.yml  # Debug: Print the content of docker-compose.yml after sed commands
       - name: Check if changes exist
         run: |
           if [[ -n $(git status -s) ]]; then
