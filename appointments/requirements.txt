@@ -2,3 +2,11 @@ Flask
 Flask-Admin
 pymongo==3.12.0
 Flask-CORS==3.0.10
+
+Add CI/CD to the repo, can use Jenkins or Github Actions, which will 
+Pipeline should run on Pull Request & on main branch
+For versioning, you can use the commit hash or semantic versioning or any other way (but dont use latest tag)
+Build & push docker images with respective version of the microservices to dockerhub
+Use path based filtering so that if there is a change in the appointments folder, only the pipeline will build appointments microservice.
+Which means there should be separate pipelines for all microservices and if a change is in one microservice, only that pipeline should be triggered
+Update docker-compose file to update the image tag to the one that is built in this pipeline and push back to repo

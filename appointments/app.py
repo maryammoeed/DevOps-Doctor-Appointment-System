@@ -4,7 +4,7 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
-client = MongoClient('mongodb://mongodb:27017/')  # Replace with your MongoDB connection string
+client = MongoClient('mongodb://mongodb-service:27017/')
 db = client['appointments_db']
 appointments_collection = db['appointments']
 
@@ -18,7 +18,6 @@ initial_appointments = [
     {'id': "6", 'doctor': "3", 'date': "23 Nov 2023", 'rating': "Excellent"},
     {'id': "7", 'doctor': "2", 'date': "23 Nov 2023", 'rating': "Good"},
     {'id': "8", 'doctor': "3", 'date': "24 Nov 2023", 'rating': "Bad"},
-    {'id': "9", 'doctor': "4", 'date': "24 Nov 2023", 'rating': "Good"}
 ]
 
 # Insert initial values if the collection is empty
