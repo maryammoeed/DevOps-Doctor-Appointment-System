@@ -1,4 +1,4 @@
-name: CI/CD
+name: CICD
 
 on:
   push:
@@ -78,13 +78,11 @@ jobs:
 
     - name: Check if changes exist
       run: |
-        git diff --exit-code || echo "Changes detected"
-        cat docker-compose.yml  # Debug: Print the content of docker-compose.yml before attempting to commit
-
-    - name: Commit and push changes
-      run: |
-        git config --global user.email "maryammoeed68@gmail.com"
-        git config --global user.name "maryammoeed"
-        git add docker-compose.yml
-        git commit -m "Update Docker images in docker-compose.yml"
-        git push
+        if [[ -n $(git status -s) ]]; then
+          echo "Changes detected"
+          git add docker-compose.yml
+          git commit -m "Update Docker images in docker-compose.yml"
+          git push
+        else
+          echo "No changes detected"
+        fi
