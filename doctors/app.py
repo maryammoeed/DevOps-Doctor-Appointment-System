@@ -23,7 +23,7 @@ if doctors_collection.count_documents({}) == 0:
 
 @app.route('/hello')
 def hello():
-    greeting = "HELLO WORLD!"
+    greeting = "HELLO WORLD"
     return greeting
 
 @app.route('/doctors', methods=["GET"])

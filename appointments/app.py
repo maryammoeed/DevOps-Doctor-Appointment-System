@@ -26,7 +26,7 @@ if appointments_collection.count_documents({}) == 0:
 
 @app.route('/hello')
 def hello():
-    greeting = "Hello world!"
+    greeting = "HELLO WORLD"
     return greeting
 
 @app.route('/appointments', methods=["GET"])
