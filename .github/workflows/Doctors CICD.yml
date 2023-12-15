@@ -32,11 +32,11 @@ jobs:
         context: ./doctors
         file: ./doctors/Dockerfile
         push: true
-        tags: maryammoeed1/doctors-service:${{ github.sha }}
+        tags: maryammoeed1/doctor-service:${{ github.sha }}
 
     - name: Update docker-compose.yml
       run: |
-        sed -i 's/maryammoeed1\/doctors-service:.*/maryammoeed1\/doctors-service:${{ github.sha }}/' docker-compose.yml
+        sed -i 's/maryammoeed1\/doctor-service:.*/maryammoeed1\/doctor-service:${{ github.sha }}/' docker-compose.yml
       working-directory: ${{ github.workspace }}
 
     - name: Check for changes
